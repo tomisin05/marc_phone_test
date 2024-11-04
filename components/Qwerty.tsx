@@ -15,7 +15,7 @@ export default observer(function Querty({ store }: { store: StoreType }) {
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto">
+    <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto mb-4">
       {qwerty.map((row, rowIndex) => (
         <div key={rowIndex} className="flex justify-center mb-2">
           {row.split('').map((char) => {
@@ -29,7 +29,7 @@ export default observer(function Querty({ store }: { store: StoreType }) {
             return (
               <div
                 key={char}
-                className={`rounded-md m-px flex h-12 w-8 sm:h-14 sm:w-10 items-center justify-center uppercase ${bgColor} cursor-pointer text-sm sm:text-base`}
+                className={`rounded-md m-px flex h-10 w-6 sm:h-12 sm:w-8 md:h-14 md:w-10 items-center justify-center uppercase ${bgColor} cursor-pointer text-xs sm:text-sm md:text-base`}
                 onClick={() => handleKeyPress(char)}
                 onTouchStart={(e) => { e.preventDefault(); handleKeyPress(char); }}
               >
@@ -41,14 +41,14 @@ export default observer(function Querty({ store }: { store: StoreType }) {
       ))}
       <div className="flex justify-center mt-2">
         <div
-          className="rounded-md m-px flex h-12 sm:h-14 px-2 items-center justify-center uppercase bg-gray-200 cursor-pointer text-sm sm:text-base"
+          className="rounded-md m-px flex h-10 sm:h-12 md:h-14 px-2 items-center justify-center uppercase bg-gray-200 cursor-pointer text-xs sm:text-sm md:text-base"
           onClick={() => handleKeyPress('Backspace')}
           onTouchStart={(e) => { e.preventDefault(); handleKeyPress('Backspace'); }}
         >
           Backspace
         </div>
         <div
-          className="rounded-md m-px flex h-12 sm:h-14 px-2 items-center justify-center uppercase bg-gray-200 cursor-pointer ml-2 text-sm sm:text-base"
+          className="rounded-md m-px flex h-10 sm:h-12 md:h-14 px-2 items-center justify-center uppercase bg-gray-200 cursor-pointer ml-2 text-xs sm:text-sm md:text-base"
           onClick={() => handleKeyPress('Enter')}
           onTouchStart={(e) => { e.preventDefault(); handleKeyPress('Enter'); }}
         >
