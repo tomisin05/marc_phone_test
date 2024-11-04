@@ -12,7 +12,7 @@ const DifficultySelector = observer(({ onDifficultySet }: DifficultyProps) => {
   const handleDifficultyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const difficulty = e.target.value as Difficulty;
     PuzzleStore.setDifficulty(difficulty);
-    onDifficultySet(difficulty);
+    onDifficultySet();
   };
 
   return (

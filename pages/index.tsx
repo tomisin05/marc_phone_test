@@ -50,8 +50,9 @@ export default observer(function Home() {
     setGameStarted(false);
   }, []);
 
-  const handleDifficultyChange = (difficulty: Difficulty) => {
-    startGame(difficulty);
+  const handleDifficultyChange = () => {
+    // The difficulty is already set in PuzzleStore by DifficultySelector
+    startGame(PuzzleStore.difficulty);
   };
 
   if (!gameStarted) {
