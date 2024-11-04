@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
 import Guess from '../components/Guess'
 import Querty from '../components/Qwerty'
-import PuzzleStore from '../stores/PuzzleStore'
+import PuzzleStore, { Difficulty } from '../stores/PuzzleStore'
 import DifficultySelector, { DifficultyProps } from '../components/DifficultySelector'
 
 export default observer(function Home() {
