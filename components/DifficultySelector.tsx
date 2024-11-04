@@ -23,7 +23,7 @@ const DifficultySelector = observer(({ onDifficultySet }: DifficultyProps) => {
         value={PuzzleStore.difficulty}
         className="p-2 rounded"
       >
-        <option value="default">Default (6 guesses)</option>
+        <option value="default">Default (5 guesses)</option>
         <option value="easy">Easy (7 guesses)</option>
         <option value="medium">Medium (5 guesses)</option>
         <option value="hard">Hard (3 guesses)</option>
