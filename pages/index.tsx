@@ -34,12 +34,30 @@ export default observer(function Home() {
 
   
 
-  const startGame = () => {
+  const startGame = (difficulty: Difficulty) => {
+    store.setDifficulty(difficulty);
+    store.resetGame();
     setGameStarted(true);
   };
 
+  const changeDifficulty = () => {
+    setGameStarted(false);
+  };
+
+  useEffect(() => {
+    const storedDifficulty = localStorage.getItem('difficulty') as Difficulty;
+    if (storedDifficulty) {
+      store.setDifficulty(storedDifficulty);
+      setGameStarted(true);
+    }
+  }, []);
+
+  const handleDifficultyChange = (difficulty: Difficulty) => {
+    startGame(difficulty);
+  };
+
   if (!gameStarted) {
-    return <DifficultySelector onDifficultySet={startGame} />;
+    return <DifficultySelector onDifficultySet={handleDifficultyChange} />;
   }
 
 
@@ -51,6 +69,9 @@ export default observer(function Home() {
       <div className="text-white mb-4 text-center">
         <h2 className="mb-2 mobile-friendly-text">Current Difficulty: {store.difficulty}</h2>
         <p className="mobile-friendly-text">Max Guesses: {store.maxGuesses}</p>
+        <button onClick={() => setGameStarted(false)} className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Change Difficulty
+        </button>
       </div>
       <div className="mb-4 w-full max-w-xs sm:max-w-sm md:max-w-md">
         {Array.from({ length: store.maxGuesses }).map((_, i) => (

@@ -227,7 +227,16 @@ class PuzzleStore {
 
   constructor() {
     makeAutoObservable(this)
-    this.init()
+    if (typeof window !== 'undefined') {
+      const storedDifficulty = localStorage.getItem('difficulty')
+      if (storedDifficulty) {
+        this.setDifficulty(storedDifficulty as Difficulty)
+      } else {
+        this.init()
+      }
+    } else {
+      this.init()
+    }
   }
 
   get won() {
@@ -266,6 +275,9 @@ class PuzzleStore {
 
   setDifficulty(difficulty: Difficulty) {
     this.difficulty = difficulty
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('difficulty', difficulty)
+    }
     switch (difficulty) {
       case 'easy':
         this.maxGuesses = 7
@@ -280,8 +292,12 @@ class PuzzleStore {
         this.maxGuesses = 1
         break
       default:
-        this.maxGuesses = 6
+        this.maxGuesses = 5
     }
+    this.resetGame()
+  }
+
+  resetGame() {
     this.init()
   }
 
