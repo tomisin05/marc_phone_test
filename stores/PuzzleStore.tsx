@@ -223,7 +223,7 @@ class PuzzleStore {
   guesses: string[] = []
   currentGuess = 0
   difficulty: Difficulty = 'default'
-  maxGuesses = 5
+  maxGuesses = 6
 
   constructor() {
     makeAutoObservable(this)
@@ -292,7 +292,7 @@ class PuzzleStore {
         this.maxGuesses = 1
         break
       default:
-        this.maxGuesses = 5
+        this.maxGuesses = 6
     }
     this.resetGame()
   }
