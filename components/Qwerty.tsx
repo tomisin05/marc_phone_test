@@ -4,6 +4,7 @@ type StoreType = {
   exactGuesses: string[];
   inexactGuesses: string[];
   allSubmittedLetters: string[];
+  handleInput: (input: string) => void;
 };
 
 export default observer(function Querty({ store }: { store: StoreType }) {
