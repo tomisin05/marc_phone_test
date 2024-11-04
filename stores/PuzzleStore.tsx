@@ -216,7 +216,7 @@ import { makeAutoObservable } from 'mobx'
 import words from '../words.json'
 import wordlist from '../wordlist.json'
 
-type Difficulty = "default" | 'easy' | 'medium' | 'hard' | 'impossible'
+export type Difficulty = "default" | 'easy' | 'medium' | 'hard' | 'impossible'
 
 class PuzzleStore {
   word = ''

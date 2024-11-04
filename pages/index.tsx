@@ -41,15 +41,13 @@ export default observer(function Home() {
   };
 
   const changeDifficulty = () => {
+    store.resetGame();
     setGameStarted(false);
   };
 
   useEffect(() => {
-    const storedDifficulty = localStorage.getItem('difficulty') as Difficulty;
-    if (storedDifficulty) {
-      store.setDifficulty(storedDifficulty);
-      setGameStarted(true);
-    }
+    // Remove the check for stored difficulty to always start with the selection page
+    setGameStarted(false);
   }, []);
 
   const handleDifficultyChange = (difficulty: Difficulty) => {
@@ -86,7 +84,7 @@ export default observer(function Home() {
       {store.won && <h1 className="text-green-400 text-2xl mb-4">You won!</h1>}
       {store.lost && <h1 className="text-red-400 text-2xl mb-4">You lost! The word was: {store.word}</h1>}
       {(store.won || store.lost) && (
-        <button onClick={() => { store.init(); setGameStarted(false); forceUpdate({}); }} className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm sm:text-base">Play Again</button>
+        <button onClick={() => { setGameStarted(false); }} className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm sm:text-base">Play Again</button>
       )}
       <p className="text-white mb-4 text-center mobile-friendly-text">Tap or click the letters below to make your guess. Use 'Enter' to submit and 'Backspace' to delete.</p>
       <Querty store={store} />
