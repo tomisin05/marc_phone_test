@@ -31,7 +31,6 @@ export default observer(function Querty({ store }: { store: StoreType }) {
                 key={char}
                 className={`rounded-md m-px flex h-10 w-6 sm:h-12 sm:w-8 md:h-14 md:w-10 items-center justify-center uppercase ${bgColor} cursor-pointer text-xs sm:text-sm md:text-base`}
                 onClick={() => handleKeyPress(char)}
-                onTouchStart={(e) => { e.preventDefault(); handleKeyPress(char); }}
               >
                 {char}
               </div>
@@ -43,14 +42,12 @@ export default observer(function Querty({ store }: { store: StoreType }) {
         <div
           className="rounded-md m-px flex h-10 sm:h-12 md:h-14 px-2 items-center justify-center uppercase bg-gray-200 cursor-pointer text-xs sm:text-sm md:text-base"
           onClick={() => handleKeyPress('Backspace')}
-          onTouchStart={(e) => { e.preventDefault(); handleKeyPress('Backspace'); }}
         >
           Backspace
         </div>
         <div
           className="rounded-md m-px flex h-10 sm:h-12 md:h-14 px-2 items-center justify-center uppercase bg-gray-200 cursor-pointer ml-2 text-xs sm:text-sm md:text-base"
           onClick={() => handleKeyPress('Enter')}
-          onTouchStart={(e) => { e.preventDefault(); handleKeyPress('Enter'); }}
         >
           Enter
         </div>
