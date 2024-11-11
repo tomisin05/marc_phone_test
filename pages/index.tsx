@@ -63,7 +63,7 @@ export default observer(function Home() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-between bg-gray-600 overflow-y-auto mobile-friendly-container space-y-4 px-2 sm:px-4">
       <h1 className="bg-gradient-to-br from-blue-400 to-green-400 bg-clip-text text-3xl sm:text-4xl md:text-6xl font-bold uppercase text-transparent mb-4 mt-4">
-        Wordle
+        M.A.R.C.(LE)
       </h1>
       <div className="text-white mb-4 text-center">
         <h2 className="mb-2 mobile-friendly-text">Current Difficulty: {store.difficulty}</h2>
