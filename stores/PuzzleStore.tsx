@@ -212,6 +212,9 @@
 // export default new PuzzleStore()
 
 
+// ********************************************************************************************************
+
+
 import { makeAutoObservable } from 'mobx'
 import words from '../words.json'
 import wordlist from '../wordlist.json'
@@ -356,6 +359,8 @@ class PuzzleStore {
 }
 
 export default new PuzzleStore()
+
+
 
 
 
