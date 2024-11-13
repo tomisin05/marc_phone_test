@@ -6,7 +6,7 @@ export default function Guess({ isGuessed, guess, word }) {
           ? 'bg-black'
           : guess[i] === word[i]
           ? 'bg-green-400'
-          : word.includes(guess[i]) && word.indexOf(guess[i]) !== i
+          : word.includes(guess[i])
           ? 'bg-yellow-400'
           : 'bg-black'
 
