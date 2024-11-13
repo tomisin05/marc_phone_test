@@ -17,6 +17,7 @@ export default function Guess({ isGuessed, guess, word }) {
             {guess[i]}
           </div>
         )
+        
       })}
     </div>
   )
