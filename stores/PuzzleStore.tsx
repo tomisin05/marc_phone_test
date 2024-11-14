@@ -169,7 +169,7 @@
 //         this.maxGuesses = 1
 //         break
 //       default:
-//         this.maxGuesses = 6
+//         this.maxGuesses = 5
 //     }
 //     this.init()
 //   }
@@ -215,7 +215,7 @@
 // ********************************************************************************************************
 
 
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable, observable, toJS } from 'mobx'
 import words from '../words.json'
 import wordlist from '../wordlist.json'
 
@@ -223,13 +223,21 @@ export type Difficulty = "default" | 'easy' | 'medium' | 'hard' | 'impossible'
 
 class PuzzleStore {
   word = ''
-  guesses: string[] = []
+  guesses = observable.array<string>([])
   currentGuess = 0
   difficulty: Difficulty = 'default'
   maxGuesses = 5
-
+  lastGuessColors: string[] | null = null
+  
   constructor() {
-    makeAutoObservable(this)
+    makeAutoObservable(this, {
+      word: true,
+      guesses: observable,  // Change to simple observable for better reactivity
+      currentGuess: true,
+      difficulty: true,
+      maxGuesses: true,
+      lastGuessColors: true
+    }, { autoBind: true })
     if (typeof window !== 'undefined') {
       const storedDifficulty = localStorage.getItem('difficulty')
       if (storedDifficulty) {
@@ -240,30 +248,32 @@ class PuzzleStore {
     } else {
       this.init()
     }
+    console.log('PuzzleStore initialized:', { word: this.word, currentGuess: this.currentGuess, guesses: this.guesses })
   }
 
   get won() {
-    return this.guesses[this.currentGuess - 1] === this.word
+    const lastGuess = toJS(this.guesses)[this.currentGuess - 1];
+    return lastGuess === this.word;
   }
 
   get lost() {
-    return this.currentGuess === this.maxGuesses
+    return !this.won && this.currentGuess === this.maxGuesses;
   }
 
   get allGuesses() {
-    return Array.from(new Set(this.guesses.join('')))
+    return Array.from(new Set(toJS(this.guesses).join('')))
   }
 
   get exactGuesses() {
     return Array.from(new Set(
       this.word.split('').filter((letter, i) => 
-        this.guesses.slice(0, this.currentGuess).some(guess => guess[i] === letter)
+        toJS(this.guesses).slice(0, this.currentGuess).some(guess => guess[i] === letter)
       )
     ))
   }
 
   get submittedGuesses() {
-    return this.guesses.slice(0, this.currentGuess)
+    return toJS(this.guesses).slice(0, this.currentGuess)
   }
 
   get allSubmittedLetters() {
@@ -304,37 +314,163 @@ class PuzzleStore {
     this.init()
   }
 
-  init() {
-    this.word = wordlist[Math.floor(Math.random() * wordlist.length)]
-    this.guesses = new Array(this.maxGuesses).fill('')
-    this.currentGuess = 0
-  }
+  // Removed duplicate init() and submitGuess() functions
 
-  submitGuess() {
-    if (words.includes(this.guesses[this.currentGuess])) {
-      if (this.guesses[this.currentGuess] === this.word || this.currentGuess === this.maxGuesses - 1) {
-        // Game over logic here if needed
+  fetchGuessColors = async () => {
+    try {
+      console.log('fetchGuessColors called')
+      
+      // Always proceed with the API call, even for the first guess
+      if (!toJS(this.guesses)[this.currentGuess]) {
+        console.log('No valid guess to check, skipping API call')
+        return
       }
-      this.currentGuess += 1
+
+      console.log('Current state before API call:', { 
+        word: this.word, 
+        currentGuess: this.currentGuess, 
+        guesses: toJS(this.guesses),
+        lastGuessColors: toJS(this.lastGuessColors)
+      })
+
+      // Create the request body directly with all required fields
+      const requestBody = {
+        word: String(this.word),
+        currentGuess: this.currentGuess,
+        guesses: toJS(this.guesses),
+        mostRecentGuessColors: toJS(this.lastGuessColors) || []
+      };
+      
+      const stringifiedBody = JSON.stringify(requestBody);
+      
+      // Log after stringification to see exact data being sent
+      // Log full request body structure
+      console.log('Request body:', {
+        word: requestBody.word,
+        currentGuess: requestBody.currentGuess,
+        guesses: requestBody.guesses,
+        mostRecentGuessColors: requestBody.mostRecentGuessColors
+      });
+
+      const response = await fetch('/api/getGuessColors', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: stringifiedBody,
+      })
+
+      console.log('Response status:', response.status)
+      const data = await response.json()
+      console.log('Response data:', data)
+
+      if (response.ok && data.colors) {
+        this.lastGuessColors = data.colors
+        console.log('Fetched colors:', data.colors)
+      } else {
+        console.error('API error or no colors returned:', data.message || 'Unknown error')
+      }
+    } catch (error) {
+      console.error('Failed to fetch guess colors:', error)
     }
   }
 
-  handleKeyup = (e: KeyboardEvent) => {
+  initializeFirstGuess() {
+    if (!this.guesses[0]) {
+      this.guesses.replace([...this.guesses.slice(0, 0), '', ...this.guesses.slice(1)]);
+    }
+  }
+
+  init() {
+    this.word = wordlist[Math.floor(Math.random() * wordlist.length)]
+    const newGuesses = new Array(this.maxGuesses).fill('')
+    this.guesses.replace(newGuesses);
+    console.log('Store initialized with guesses:', this.guesses.slice());
+    this.currentGuess = 0
+    this.lastGuessColors = ['bg-black', 'bg-black', 'bg-black', 'bg-black', 'bg-black', 'bg-black']
+    console.log('PuzzleStore initialized:', { word: this.word, currentGuess: this.currentGuess, guesses: this.guesses.slice() })
+  }
+
+  // run in action
+  runInAction (action: () => void) {
+    action()
+  }
+
+  async submitGuess() {
+    console.log('submitGuess called')
+    if (this.currentGuess < this.maxGuesses && toJS(this.guesses)[this.currentGuess].length === 6) {
+      console.log('Submitting guess:', { currentGuess: this.currentGuess, guess: toJS(this.guesses)[this.currentGuess] })
+      if (words.includes(toJS(this.guesses)[this.currentGuess])) {
+        // Calculate colors for the current guess
+        const newColors = Array(6).fill('').map((_, i) => {
+          const currentGuess = toJS(this.guesses)[this.currentGuess];
+          if (currentGuess[i] === this.word[i]) {
+            return 'bg-green-400'
+          } else if (this.word.includes(currentGuess[i])) {
+            return 'bg-yellow-400'
+          } else {
+            return 'bg-black'
+          }
+        })
+        
+        // Set the colors and call the API before updating game state
+        this.lastGuessColors = newColors;
+        
+        const apiPromise = this.fetchGuessColors();
+        
+        if (toJS(this.guesses)[this.currentGuess] === this.word || this.currentGuess === this.maxGuesses - 1) {
+          console.log('Game over condition met')
+        }
+        
+        // Wait for API call to complete before incrementing
+        await apiPromise;
+        
+        this.runInAction(() => {
+            this.currentGuess += 1;
+        });
+        console.log('Current guess incremented:', this.currentGuess)
+      } else {
+        console.log('Invalid word:', toJS(this.guesses)[this.currentGuess])
+      }
+      console.log('Current state after submission:', { word: this.word, currentGuess: this.currentGuess, guesses: toJS(this.guesses) })
+    } else {
+      console.log('Cannot submit guess: either max guesses reached or current guess is not complete')
+    }
+  }
+
+  handleKeyup = async (e: KeyboardEvent) => {
     if (this.won || this.lost) {
       return
     }
 
-    if (e.key === 'Enter' && this.guesses[this.currentGuess].length === 6) {
-      return this.submitGuess()
-    }
-
-    if (e.key === 'Backspace') {
-      this.guesses[this.currentGuess] = this.guesses[this.currentGuess].slice(0, -1)
+    // Ensure currentGuess is within bounds
+    if (this.currentGuess >= this.maxGuesses) {
       return
     }
 
-    if (this.guesses[this.currentGuess].length < 6 && e.key.match(/^[A-z]$/)) {
-      this.guesses[this.currentGuess] += e.key.toLowerCase()
+    // Initialize current guess if needed
+    const currentGuesses = toJS(this.guesses);
+    if (!currentGuesses[this.currentGuess]) {
+      this.guesses.splice(this.currentGuess, 1, '');
+    }
+
+    if (e.key === 'Enter' && toJS(this.guesses)[this.currentGuess].length === 6) {
+      await this.submitGuess()
+      return
+    }
+
+    if (e.key === 'Backspace') {
+      const currentGuess = toJS(this.guesses)[this.currentGuess];
+      this.guesses.splice(this.currentGuess, 1, currentGuess.slice(0, -1));
+      return
+    }
+
+    if (e.key.match(/^[A-Za-z]$/)) {
+      const currentGuess = toJS(this.guesses)[this.currentGuess];
+      if (currentGuess.length < 6) {
+        this.guesses.splice(this.currentGuess, 1, currentGuess + e.key.toLowerCase());
+        console.log('Updated guesses (keyup):', this.guesses.slice())
+      }
     }
   }
 
@@ -343,22 +479,38 @@ class PuzzleStore {
       return
     }
 
-    if (input === 'Enter' && this.guesses[this.currentGuess].length === 6) {
-      return this.submitGuess()
+    // Initialize current guess if needed
+    if (!toJS(this.guesses)[this.currentGuess]) {
+      this.guesses.splice(this.currentGuess, 1, '');
     }
 
-    if (input === 'Backspace') {
-      this.guesses[this.currentGuess] = this.guesses[this.currentGuess].slice(0, -1)
+    if (input === 'Enter' && toJS(this.guesses)[this.currentGuess].length === 6) {
+      this.submitGuess()
       return
     }
 
-    if (this.guesses[this.currentGuess].length < 6 && input.match(/^[A-z]$/)) {
-      this.guesses[this.currentGuess] += input.toLowerCase()
+    if (input === 'Backspace') {
+      const currentGuess = toJS(this.guesses)[this.currentGuess];
+      const newGuess = currentGuess.slice(0, -1);
+      this.guesses.splice(this.currentGuess, 1, newGuess);
+      return
+    }
+
+    // Handle letter input
+    if (input.match(/^[A-Za-z]$/)) {
+      const currentGuess = toJS(this.guesses)[this.currentGuess] || '';
+      if (currentGuess.length < 6) {
+        const newGuess = currentGuess + input.toLowerCase();
+        this.guesses.splice(this.currentGuess, 1, newGuess);
+        console.log('Updated guesses:', this.guesses.slice())
+      }
     }
   }
 }
 
 export default new PuzzleStore()
+
+
 
 
 
