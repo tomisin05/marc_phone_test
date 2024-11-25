@@ -218,6 +218,7 @@
 import { makeAutoObservable, observable, toJS } from 'mobx'
 import words from '../words.json'
 import wordlist from '../wordlist.json'
+import { supabase } from '../lib/supabaseClient'
 
 export type Difficulty = "default" | 'easy' | 'medium' | 'hard' | 'impossible'
 
@@ -367,11 +368,51 @@ class PuzzleStore {
       if (response.ok && data.colors) {
         this.lastGuessColors = data.colors
         console.log('Fetched colors:', data.colors)
+
+
+        // Save colors to Supabase
+        try {
+        const { error } = await supabase
+          .from('guess_colors')
+          .insert([
+            { colors: data.colors }
+          ])
+        
+        if (error) {
+          console.error('Error saving colors to Supabase:', error)
+        } else {
+          console.log('Colors saved to Supabase successfully')
+        }
+      } catch (supabaseError) {
+        console.error('Supabase error:', supabaseError)
+      }
+
       } else {
         console.error('API error or no colors returned:', data.message || 'Unknown error')
       }
     } catch (error) {
       console.error('Failed to fetch guess colors:', error)
+    }
+  }
+
+  getRecentColors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('guess_colors')
+        .select('colors')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+  
+      if (error) {
+        console.error('Error fetching recent colors:', error)
+        return null
+      }
+  
+      return data.colors
+    } catch (error) {
+      console.error('Failed to fetch recent colors:', error)
+      return null
     }
   }
 

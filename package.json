@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.46.1",
     "mobx": "^6.5.0",
     "mobx-react-lite": "^3.3.0",
     "next": "latest",
